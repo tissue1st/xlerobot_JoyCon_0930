@@ -1,0 +1,7 @@
+# Third-party clones + local Python env (re-create them per the README instead of committing)
+/lerobot/
+/joycon-robotics/
+/XLeRobot/
+/.venv/
+__pycache__/
+*.pyc
