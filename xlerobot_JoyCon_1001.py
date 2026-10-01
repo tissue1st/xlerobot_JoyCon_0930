@@ -3,7 +3,7 @@
 원격조작. teleop_so101_joint_nudge.py에서 발전시킨 스크립트.
 
 2026-10-01 버전 (xlerobot_JoyCon_1001.py). 이전 버전 xlerobot_JoyCon_0930.py와의
-차이는 CHANGES_0930_to_1001.md 참고.
+차이는 CHANGELOG.md (버전별 변경 기록) 참고.
 
 현재 상태 (2026-10-01, step 3) -- 모드 두 개, L3로 토글
 (Joy-Con 두 개 모두 필요):

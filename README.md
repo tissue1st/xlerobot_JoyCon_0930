@@ -7,12 +7,13 @@ follower arms, 2-motor head camera, 2-wheel differential base).
 SO101, hardware-tuned 2026-09-04) via `xlerobot_JoyCon_0929.py` (dual arm
 + wheels, 2026-09-29), and runs on Ubuntu and Windows.
 
-> **2026-10-01: new version `xlerobot_JoyCon_1001.py`** (separate file,
-> same setup and command-line options; `xlerobot_JoyCon_0930.py` is left
-> unchanged). It changes the button layout — stick = pan/lift, ZR/ZL =
-> gripper, R + right stick = camera, **L3 alone toggles ARM ↔ WHEEL** —
-> and is **offline-tested only** so far. What changed and what to check
-> on hardware: [`CHANGES_0930_to_1001.md`](CHANGES_0930_to_1001.md).
+> **Versions:** every improved version is a new file
+> (`xlerobot_JoyCon_0930.py`, `xlerobot_JoyCon_1001.py`, …) with the same
+> setup and command-line options; older files are never edited. Each
+> version's changes, reasons and hardware-check status are logged in
+> [`CHANGELOG.md`](CHANGELOG.md) (Korean). Latest: **1001** (2026-10-01) —
+> stick = pan/lift, ZR/ZL = gripper, R + right stick = camera, **L3 alone
+> toggles ARM ↔ WHEEL**; **offline-tested only** so far.
 > The rest of this README describes the 0930 script.
 
 **Not included in this repo — install them yourself (steps below):**
