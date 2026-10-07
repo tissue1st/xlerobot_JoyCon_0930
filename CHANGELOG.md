@@ -25,6 +25,10 @@ python xlerobot_JoyCon_<버전>.py --port1 COM5 --port2 COM6                   #
 
 | 버전 | 날짜 | 파일 | 한 줄 요약 | 상태 |
 |---|---|---|---|---|
+| Final 1007 newcontrol | 2026-10-07 | `xlerobot_Final_1007_newcontrol.py` | Final 1007c에서 팔 조작만 IK(좌표 조종)로: 스틱 상/하 = 그리퍼 앞/뒤, X/B = 위/아래, 손목이 따라 돌아 그리퍼 각도 유지, home/capture = 팔 시작 자세 | 오프라인 테스트만 |
+| Final 1007c | 2026-10-07 | `xlerobot_Final_1007c.py` | Final 1007b + camera 1007b의 인식: YOLOE-26s 단어 지정 모드, 단어 15개, desk·chair 숨김, 신뢰도 하한 0.3. 텔레옵은 1007b와 같음 | 오프라인 테스트만 |
+| camera 1007b | 2026-10-07 | `xlerobot_camera_1007b.py` | 인식 모델을 YOLOE-26s 단어 지정 모드로 교체(프롬프트 없는 모드 뺌). 찾을 단어 15개, 블랙리스트 desk·chair(모델엔 넣고 화면에서만 숨김). 신뢰도 하한 0.3 | 오프라인 테스트만 |
+| Final 1007b | 2026-10-07 | `xlerobot_Final_1007b.py` | 그리퍼 속도 ×1.5 (0.3 → 0.45 °/틱). 나머지는 Final 1007과 같음 | 오프라인 테스트만 |
 | camera 1007 | 2026-10-07 | `xlerobot_camera_1007.py` | 벽 오인식 줄이기: 블랙리스트 `BLOCK_WORDS` 확장, 화이트리스트 `ALLOW_WORDS`/`--allow`, 인식 전에 거름(`classes=`), 화면 60% 이상 박스 버림. 기본 카메라 번호 헤드 0, 왼 4, 오른 2 | 오프라인 테스트만 |
 | Final 1007 | 2026-10-07 | `xlerobot_Final_1007.py` | 텔레옵 1006 + 카메라 1006을 한 파일로 합침. 명령 하나로 동시에 실행(카메라는 `.venv-vision` 별도 프로세스). 스냅샷은 화면 한 장만 | 일부 실기 확인 |
 | camera 1006 | 2026-10-06 (화면 정리 10-07) | `xlerobot_camera_1006.py` | 카메라 3대 라이브 뷰 + YOLOE 물체 인식 (텔레옵과 별도, `.venv-vision`) | 일부 실기 확인 |
@@ -39,6 +43,189 @@ python xlerobot_JoyCon_<버전>.py --port1 COM5 --port2 COM6                   #
 
 ---
 
+## Final 1007 newcontrol (2026-10-07)
+
+- **파일**: `xlerobot_Final_1007_newcontrol.py`
+- **기준 버전**: Final 1007c (팔 조작만 바뀜)
+- **상태**: 오프라인 테스트만 (2026-10-07).
+  - 가짜 Joy-Con으로 `common_update`를 돌리는 테스트 14개 통과: 스틱 위 = 앞으로만(높이 그대로), X = 위로만, 손목 보정으로 그리퍼 각도 유지, 끝까지 뻗으면 멈춤(미끄러지지 않음), 반대로 당기면 바로 돌아옴, 뒤로는 6 cm에서 멈춤, home = 시작 자세, WHEEL 모드에서 팔 고정, ARM 전에는 안 움직임.
+  - 가짜 로봇으로 `Teleop` 시작과 제어 틱을 돌려 `send_action`에 IK 목표가 들어가는 것을 확인했다.
+  - 로봇 실기는 아직 안 했다. 방향 부호(`STICK_REACH_SIGN`, `IK_HEIGHT_SIGN`, 손목 보정 부호)는 미검증이다.
+- **요약**: "조작이 진심으로 어렵다"(사용자)에 대한 첫 시도. 관절을 하나씩 움직이는 대신 그리퍼 끝의 위치를 움직이고, 관절 각도는 IK가 계산한다. XLeRobot 공식 Joy-Con 예제와 같은 방식이다.
+
+### 개선된 점 (왜 바꿨나)
+| Final 1007c | newcontrol |
+|---|---|
+| 그리퍼를 앞으로 뻗으려면 스틱(어깨 들기)과 X/B(팔꿈치)를 번갈아 맞춰야 했다 | 스틱 위 = 그리퍼가 수평으로 앞으로. 어깨와 팔꿈치는 IK가 같이 움직인다 |
+| 팔을 움직이면 그리퍼 각도가 같이 바뀌어서 손목을 다시 맞춰야 했다 | 손목이 자동으로 반대로 돌아 그리퍼가 바닥에 대해 같은 각도를 유지한다 (`KEEP_GRIPPER_ANGLE`) |
+| 팔이 엉뚱한 자세가 되면 되돌리기 어려웠다 | home (L: capture) 한 번 = 팔이 시작 자세로 |
+
+### 버튼 비교 (ARM 모드, Joy-Con마다 자기 팔)
+| 입력 | Final 1007c | newcontrol |
+|---|---|---|
+| 스틱 좌/우 | shoulder_pan | 같음 (팔 전체 좌/우 회전) |
+| 스틱 상/하 | shoulder_lift | **그리퍼 앞/뒤** (수평) |
+| X/B (L: ↑/↓) | elbow_flex | **그리퍼 위/아래** (수직) |
+| home (L: capture) | 비어 있음 | **팔 시작 자세로** (pan, lift, elbow. 손목·그리퍼는 그대로) |
+| 자이로, ZR/ZL, plus/minus, R+스틱, L3, WHEEL 모드 | — | 같음 |
+
+### 바뀐 것
+- IK는 공식 XLeRobot의 `SO101Kinematics.inverse_kinematics`를 그대로 옮겼다(`so101_ik`).
+  - **공식 `forward_kinematics`는 IK의 역함수가 아니다.** 계산해 보니 elbow가 32도 어긋나고 부호가 반대였다. 공식 예제는 IK만 쓰므로 문제가 드러나지 않았던 것 같다. 그래서 IK를 정확히 뒤집는 `so101_fk`를 새로 썼다(관절 0 자세 = x 16.3 cm, z 11.8 cm로 공식 시작점 16.29, 11.31 cm와 맞음).
+  - IK와 FK가 정확히 맞는 범위는 elbow 약 −73.8 ~ 90도, lift 약 95.7도 이하라서, 그 안(`IK_ELBOW_MIN_DEG` −70, `IK_ELBOW_MAX_DEG` 88, `IK_LIFT_MAX_DEG` 93)과 캘리브레이션 한계 중 좁은 쪽으로 자른다.
+- 한계에서의 동작: 움직인 점이 닿지 않거나 관절 한계를 넘으면 그 움직임을 버린다. 처음엔 잘라서 맞췄는데, 끝까지 뻗은 채 스틱을 밀면 그리퍼가 아래로 미끄러져서(테스트에서 z 11.8 → 9.3 cm) 바꿨다. 두 축을 같이 움직이다 한쪽만 막히면 다른 쪽은 간다.
+- 끝까지 뻗으면 팔이 거의 일자라 더 올라갈 수 없다(기하학적으로 불가능). 조금 당긴 뒤 올린다.
+- 뒤로는 어깨 축에서 `IK_X_MIN_M`(6 cm)까지만 당겨진다. 이게 없으면 그리퍼가 어깨 뒤로 넘어가 몸체와 부딪힐 수 있었다(테스트에서 lift −100도까지 감).
+- 손목 보정: wrist_flex 목표 = 자이로 값 − (lift 변화) − (elbow 변화). 공식 예제의 `wrist_flex = -lift - elbow + pitch`와 같은 식이고, 시작 자세 기준이다.
+- 디버그 줄에 목표점 x, z(cm)와 실제 보낸 wrist_flex(자이로 값 따로)가 나온다.
+
+### 설정값
+- 새로 생긴 것: `IK_REACH_M_PER_TICK` 0.0006, `IK_HEIGHT_M_PER_TICK` 0.0006 (끝까지 밀면 약 6 cm/s), `STICK_REACH_SIGN` +1, `IK_HEIGHT_SIGN` +1, `IK_X_MIN_M` 0.06, `IK_LIFT_MAX_DEG` 93, `IK_ELBOW_MIN_DEG` −70, `IK_ELBOW_MAX_DEG` 88, `KEEP_GRIPPER_ANGLE` True, `SO101_L1/L2/OFF1/OFF2`
+- 없어진 것: `STICK_LIFT_SIGN` (스틱 상/하가 lift가 아니게 됨)
+- 나머지(그리퍼 ×1.5, 카메라, 바퀴): Final 1007c와 같음
+
+### 실기 확인
+- [ ] 스틱 위 = 그리퍼가 **앞으로** 가는지. 뒤로 가면 `STICK_REACH_SIGN = -1.0`
+- [ ] X (L: ↑) = **위로** 가는지. 반대면 `IK_HEIGHT_SIGN = -1.0`
+- [ ] 앞/뒤로 움직일 때 높이가 거의 그대로인지 (팔 치수가 공식값과 다르면 조금 휜다)
+- [ ] 앞/뒤/위/아래로 움직일 때 그리퍼 각도가 유지되는지. 손목이 오히려 두 배로 꺾이면 보정 부호가 반대 → 우선 `KEEP_GRIPPER_ANGLE = False`
+- [ ] 속도가 적당한지 (`IK_*_M_PER_TICK`)
+- [ ] 끝까지 뻗었을 때와 뒤로 당겼을 때(6 cm) 몸체·테이블에 닿지 않는지
+- [ ] home (L: capture)으로 시작 자세로 돌아오는지. 한 번에 확 움직이니 주변을 비우고 누를 것
+- [ ] 왼팔도 같은 방향으로 움직이는지
+
+### 알려진 문제 / 남은 일
+- 높이(z) 아래쪽 한계는 따로 없다. 관절 한계까지 내려가므로 테이블에 그리퍼를 박을 수 있다(관절 조작 때와 같음).
+- home은 목표를 한 번에 시작 자세로 옮긴다(P 제어로 1초 안쪽에 도착). 부드럽게 가야 하면 램프를 넣는다.
+- 예전 방식으로 돌아가려면 Final 1007c.
+
+---
+
+## Final 1007c (2026-10-07)
+
+- **파일**: `xlerobot_Final_1007c.py`
+- **기준 버전**: Final 1007b (텔레옵) + camera 1007b (인식)
+- **상태**: 오프라인 테스트만 (2026-10-07).
+  - 텔레옵 코드는 Final 1007b와 한 줄도 다르지 않다(diff로 확인: 바뀐 곳은 docstring, 카메라 설정값, `Detector`/`extract_detections`, 카메라 프로세스에 넘기는 인자, 명령줄뿐).
+  - 카메라 프로세스에 넘기는 명령을 가짜 `Popen`으로 확인했다(기본값, `--block ""`, `--prompt`/`--block` 지정 세 경우).
+  - `.venv-vision`에서 이 파일의 `Detector`를 스냅샷 9장에 돌려 camera 1007b와 같은 결과를 확인했다.
+  - 로봇 + Joy-Con + 카메라 실기는 아직 안 했다.
+- **요약**: 텔레옵과 함께 뜨는 카메라 창의 인식을 camera 1007b와 같게 바꿨다. 이유와 자세한 내용은 camera 1007b 항목 참고.
+
+### 개선된 점 (왜 바꿨나)
+| Final 1007b | Final 1007c |
+|---|---|
+| 카메라 인식이 프롬프트 없는 모드(camera 1006 방식)라 벽, 천장, 그리퍼에 엉뚱한 이름이 붙었다 | YOLOE-26s 단어 지정 모드. `PROMPT_WORDS` 15개만 찾는다 |
+| 의자, 책상이 화면을 많이 차지했다 | `BLOCK_WORDS` = desk, chair. 모델에는 넣고 화면에서만 숨긴다 |
+
+### 바뀐 것
+- 카메라 인식만 바뀌었다. 텔레옵(버튼, 속도, 그리퍼 ×1.5, 안전장치)은 Final 1007b와 같다.
+- `--prompt` 기본값이 빈 값(프롬프트 없는 모드)에서 `PROMPT_WORDS` 15개로 바뀌었다. 새 옵션 `--block`(기본 `desk,chair`, 끄기 `--block ""`).
+- 텔레옵이 카메라 프로세스를 띄울 때 `--prompt`와 `--block`을 항상 넘긴다.
+
+### 명령줄
+```powershell
+.venv\Scripts\activate
+python xlerobot_Final_1007c.py --port1 COM5 --port2 COM6                           # 텔레옵 + 카메라
+python xlerobot_Final_1007c.py --port1 COM5 --port2 COM6 --prompt "cup,bottle,box" # 찾을 단어 바꾸기
+python xlerobot_Final_1007c.py --port1 COM5 --port2 COM6 --block ""                # 블랙리스트 끄기
+.venv-vision\Scripts\python xlerobot_Final_1007c.py --camera-only                  # 카메라 창만
+```
+
+### 설정값
+- 새로 생긴 것: `YOLOE_WEIGHTS`, `PROMPT_WORDS` (15개), `BLOCK_WORDS` (desk, chair)
+- 값이 바뀐 것: `DETECT_CONF` 0.4 → 0.3
+- 없어진 것: `YOLOE_PF_WEIGHTS`, `YOLOE_TEXT_WEIGHTS`, `IGNORE_WORDS`
+- 텔레옵 설정값: Final 1007b와 같음
+
+### 실기 확인
+- [ ] 텔레옵 + 카메라 창이 함께 뜨고, 창 아래 상태줄에 `15 words, block chair, desk`가 나온다.
+- [ ] camera 1007b의 실기 확인 항목(벽 오인식 없음, 의자·책상 숨김, 15개 물건 인식).
+- Final 1007b의 실기 확인 항목(그리퍼 속도)도 이 파일로 함께 확인하면 된다.
+
+### 알려진 문제 / 남은 일
+- 프롬프트 없는 모드가 필요하면 Final 1007b로 돌아간다.
+- Final 1007b에서 넘어온 항목은 Final 1007b 항목 참고.
+
+---
+
+## camera 1007b (2026-10-07)
+
+- **파일**: `xlerobot_camera_1007b.py`
+- **기준 버전**: camera 1007 (블랙/화이트리스트는 보류 상태였음)
+- **상태**: 오프라인 테스트만 (2026-10-07). 10-07 스냅샷 원본 9장에 돌려서 블랙리스트를 켰을 때와 껐을 때를 확인했다. 실제 카메라로는 아직 안 돌렸다.
+- **요약**: `xlerobot_model_compare_1007.py`로 모델을 비교한 뒤 사용자가 YOLOE-26s 단어 지정 모드를 골랐다. 프롬프트 없는 모드를 빼고, 찾을 단어 15개와 블랙리스트 desk·chair로 시작한다.
+
+### 개선된 점 (왜 바꿨나)
+| camera 1007의 문제 | camera 1007b에서 |
+|---|---|
+| 프롬프트 없는 모드(내장 단어 4585개)는 벽, 천장, 그리퍼에 엉뚱한 이름을 붙였고, 그걸 82단어 블랙리스트로 막아야 했다 | 단어 지정 모드만 쓴다. 비교(스냅샷 9장)에서 벽 오인식이 없었고, 평균 18 ms로 프롬프트 없는 모드(28 ms)보다 빨랐다 |
+| 찾을 물건을 고를 수 없었다 | `PROMPT_WORDS` 15개: person, cup, bottle, cell phone, box, bag, book, scissors, pen, laptop, keyboard, mouse, monitor, fan, lamp. 모델 비교 때 쓴 20개에서 table, cable, robot arm(손목 카메라에서 그리퍼를 잡음)을 빼고, chair와 desk는 블랙리스트로 옮겼다 |
+| 의자, 책상이 화면을 많이 차지했다 | 블랙리스트 `BLOCK_WORDS` = desk, chair (사용자 요청, "일단 걸어 놓기") |
+
+### 바뀐 것
+- **블랙리스트 동작이 1007과 반대다.** 막은 단어도 모델에는 넣고(그 물체를 그 단어가 차지하게), NMS가 끝난 뒤 화면에서만 뺀다. 단어에서 아예 빼면 모델이 의자를 남은 단어(box 등)로 잡을 수 있어서다. 1007은 NMS 전에 걸렀다(엉뚱한 단어가 진짜 물체 박스를 지우는 걸 막으려고).
+  - 오늘 스냅샷에서는 desk·chair를 단어에서 뺀 경우에도 의자가 다른 이름으로 잡히지 않았다. 차이는 실제 장면에서 확인한다.
+- 신뢰도 하한 `DETECT_CONF` 0.4 → 0.3. 단어 지정 모드는 점수가 낮게 나온다(모델 비교 때 쓴 값).
+- 1007의 화이트리스트(`--allow`), `--find`, 큰 박스 거르기(`MAX_BOX_FRAC`)는 뺐다. 단어 지정 모드에서는 찾을 단어가 곧 화이트리스트다.
+- 카메라 번호, 키, 화면 정리(`StableObjects`)는 1007과 같다.
+
+### 명령줄
+```powershell
+.venv-vision\Scripts\python xlerobot_camera_1007b.py                              # 단어 15개 + desk·chair 숨김
+.venv-vision\Scripts\python xlerobot_camera_1007b.py --prompt "cup,bottle,box"    # 찾을 단어 바꾸기
+.venv-vision\Scripts\python xlerobot_camera_1007b.py --block "desk,chair,person"  # 블랙리스트 바꾸기
+.venv-vision\Scripts\python xlerobot_camera_1007b.py --block ""                   # 블랙리스트 끄기
+```
+- `--prompt`, `--block` 모두 파일의 목록을 **대신**한다(더하지 않음). 1007의 `--allow`, `--find`, `--max-box-frac`는 없다.
+
+### 설정값
+- 새로 생긴 것: `PROMPT_WORDS` (15개), `YOLOE_WEIGHTS` = `yoloe-26s-seg.pt`
+- 값이 바뀐 것: `DETECT_CONF` 0.4 → 0.3, `BLOCK_WORDS` 82단어 → desk, chair
+- 없어진 것: `YOLOE_PF_WEIGHTS`, `YOLOE_TEXT_WEIGHTS`(→ `YOLOE_WEIGHTS`), `ALLOW_WORDS`, `MAX_BOX_FRAC`
+
+### 실기 확인
+- [ ] 벽, 천장에 이름이 안 붙는지
+- [ ] 의자, 책상이 화면에 안 나오는지. 의자가 다른 이름(box 등)으로 나오지 않는지
+- [ ] 15개 단어의 물건(컵, 병, 휴대폰 등)을 테이블에 놓았을 때 잡히는지
+- [ ] 손목 카메라에서 그리퍼가 엉뚱한 이름으로 잡히지 않는지
+
+### 알려진 문제 / 남은 일
+- 카메라 번호: 이 파일(1007에서 그대로)은 왼손목 4, 오른손목 2다. 2026-10-07 대화에서 사용자가 "2번 왼쪽, 4번 오른쪽"이라고도 했다. 실기에서 확인 필요.
+- 텔레옵 + 카메라 파일에는 Final 1007c로 옮겼다(2026-10-07, 사용자 요청).
+
+---
+
+## Final 1007b (2026-10-07)
+
+- **파일**: `xlerobot_Final_1007b.py`
+- **기준 버전**: Final 1007
+- **상태**: 오프라인 테스트만 (2026-10-07). 텔레옵 오프라인 테스트 세 가지를 이 파일로 돌렸다.
+  - 안전장치 테스트와 IMU 보정값 테스트는 통과했다.
+  - 전체 시뮬레이션은 네 번 돌려서 두 번 통과했다. 실패한 두 번은 매번 다른 항목(스틱 재중립, 카메라 정지, 브레이크 등)이 실패했고, 그리퍼 항목은 한 번도 실패하지 않았다. 실시간 스레드로 도는 테스트라 PC 부하(같은 시각 다른 세션의 모델 실행)로 타이밍이 흔들린 것으로 본다.
+- **요약**: 그리퍼만 1.5배 빠르게. 버튼 배치, 카메라, 바퀴는 Final 1007과 같다.
+
+### 개선된 점 (왜 바꿨나)
+| Final 1007 | Final 1007b |
+|---|---|
+| ZR/ZL을 누르고 있을 때 그리퍼가 느림 (사용자 요청) | `GRIPPER_DEG_PER_TICK` 0.3 → **0.45** (×1.5). 약 30 → 45 °/s, 끝에서 끝(60°)까지 약 2초 → 약 1.3초 |
+
+### 바뀐 것
+- 그리퍼 속도만 바뀌었다. 조작 방식은 그대로다: ZR(왼쪽은 ZL)을 누르고 있는 동안 움직이고, 새로 누를 때마다 열기 ↔ 닫기 방향이 바뀐다.
+
+### 설정값
+- 값이 바뀐 것: `GRIPPER_DEG_PER_TICK` 0.3 → 0.45
+- 새로 생긴 것 / 없어진 것: 없음
+
+### 실기 확인
+- [ ] 그리퍼 속도가 적당한지. 더 바꾸려면 `GRIPPER_DEG_PER_TICK` (Final 1007 = 0.3).
+- [ ] 빨라진 속도로 물체를 잡을 때 너무 세게 조이지 않는지 (속도가 아니라 목표 각도로 움직이므로 놓으면 그 자리에 선다).
+
+### 알려진 문제 / 남은 일
+- 2026-10-07 Final 1007 실기 중 "왼쪽 제자리 회전이 가끔 안 먹힘"을 확인했다. 원인은 왼쪽을 크게 기울이면서 앞뒤 기울기가 섞여 전체 기울기가 차단 각도(`WHEEL_TILT_CUTOFF_DEG` 75°)를 넘은 것이다(사용자 확인). 조작 문제라 코드는 고치지 않았다. 회전은 30°만 기울여도 최고속이다.
+
+---
+
 ## camera 1007 (2026-10-07)
 
 - **파일**: `xlerobot_camera_1007.py`
@@ -47,6 +234,7 @@ python xlerobot_JoyCon_<버전>.py --port1 COM5 --port2 COM6                   #
   - 10-07 스냅샷 원본 9장(`captures/`)에 1006과 1007 필터를 같은 프레임으로 돌려 비교했다(RTX 5050, 프레임 하나씩, `StableObjects` 없이).
   - 1006에서 벽, 천장, 화면 전체에 붙던 이름(`laboratory`, `darkness`, `illuminate`, `airplane window`, `electron`, `assemble`, `studio shot`)이 1007에서는 모두 빠졌다. 의자, 선풍기, 램프, 모니터는 그대로 잡힌다.
   - `--find`, `--help`, 시작할 때 단어 확인(경고)도 확인했다. 실제 카메라로는 아직 안 돌렸다.
+  - 2026-10-07: **보류** (사용자 결정). 인식 모델을 먼저 비교해서 고르기로 했다. 비교 도구 `xlerobot_model_compare_1007.py`(YOLOE 프롬프트 없음 / YOLOE 단어 지정 / RF-DETR-Seg / YOLO-World v2 / SAM 3). 블랙/화이트리스트를 계속 쓸지는 모델을 정한 뒤 결정한다.
 - **요약**: 벽면을 엉뚱한 이름으로 잡는 문제(사용자 피드백)를 블랙리스트, 화이트리스트, 큰 박스 거르기로 줄였다. 목록은 인식 **전**에 적용된다.
 
 ### 개선된 점 (왜 바꿨나)

@@ -3,12 +3,21 @@ python xlerobot_JoyCon_1006.py --check-joycons
 python xlerobot_JoyCon_1006.py --port1 COM5 --port2 COM6
 
 # camera (separate venv, no activate needed)
-.venv-vision\Scripts\python xlerobot_camera_1007.py --list
-.venv-vision\Scripts\python xlerobot_camera_1007.py
-.venv-vision\Scripts\python xlerobot_camera_1007.py --allow "chair,cup,bottle"   # whitelist
-.venv-vision\Scripts\python xlerobot_camera_1007.py --block "typewriter"         # add to blacklist
-.venv-vision\Scripts\python xlerobot_camera_1007.py --find "wall"               # search word list
+.venv-vision\Scripts\python xlerobot_camera_1007b.py --list
+.venv-vision\Scripts\python xlerobot_camera_1007b.py                             # YOLOE-26s, 15 words, desk/chair hidden
+.venv-vision\Scripts\python xlerobot_camera_1007b.py --prompt "cup,bottle,box"   # change words
+.venv-vision\Scripts\python xlerobot_camera_1007b.py --block ""                  # blacklist off
 
-# Final 1007: teleop + camera together (camera window runs from .venv-vision automatically)
-python xlerobot_Final_1007.py --port1 COM5 --port2 COM6
-.venv-vision\Scripts\python xlerobot_Final_1007.py --cam-list
+# model compare (YOLOE / RF-DETR / YOLO-World / SAM 3 side by side; Space = same frame, c = camera)
+.venv-vision\Scripts\python xlerobot_model_compare_1007.py
+.venv-vision\Scripts\python xlerobot_model_compare_1007.py --cams head,left,right
+.venv-vision\Scripts\python xlerobot_model_compare_1007.py --images "captures/*_head.jpg"   # saved photos -> captures/compare/
+
+# Final 1007c: teleop + camera together (camera window runs from .venv-vision automatically), gripper x1.5,
+# camera = YOLOE-26s with 15 words, desk/chair hidden (--prompt / --block to change)
+python xlerobot_Final_1007c.py --port1 COM5 --port2 COM6
+.venv-vision\Scripts\python xlerobot_Final_1007c.py --cam-list
+
+# Final 1007 newcontrol: same as 1007c, but the arm moves by gripper position (IK):
+# stick up/down = forward/back, X/B (L: up/down) = up/down, home (L: capture) = arm home
+python xlerobot_Final_1007_newcontrol.py --port1 COM5 --port2 COM6

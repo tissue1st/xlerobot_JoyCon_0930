@@ -9,3 +9,5 @@ __pycache__/
 # 카메라 스크립트: 처음 실행할 때 내려받는 YOLOE 가중치, 스냅샷 (s 키)
 *.pt
 /captures/
+# YOLOE 단어 지정 모드가 내려받는 MobileCLIP 텍스트 인코더 (254MB, GitHub 100MB 한도 초과)
+mobileclip*.ts

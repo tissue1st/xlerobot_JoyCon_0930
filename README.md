@@ -21,12 +21,14 @@ SO101, hardware-tuned 2026-09-04) via `xlerobot_JoyCon_0929.py` (dual arm
 > both wrist cameras in one window and labels objects with YOLOE. It runs on
 > its own venv and does not touch the robot — see
 > [Camera + object detection](#camera--object-detection-xlerobot_camera_1006py) below.
-> Latest camera version: **`xlerobot_camera_1007.py`** (2026-10-07) — fewer
-> false labels on walls: a larger blacklist (`BLOCK_WORDS`, `--block`), an
-> optional whitelist (`ALLOW_WORDS`, `--allow "chair,cup"`), both applied
-> before NMS, boxes covering ≥ 60 % of the frame dropped, `--find` to search
-> the model's word list, and default indices head 0 / left 4 / right 2.
-> **Offline-tested only** (on saved snapshots) — details in `CHANGELOG.md`.
+> Latest camera version: **`xlerobot_camera_1007b.py`** (2026-10-07) — chosen
+> after comparing models with `xlerobot_model_compare_1007.py`: YOLOE-26s in
+> text-prompt mode only (15 words in `PROMPT_WORDS`, `--prompt` to change),
+> `desk` and `chair` blacklisted (kept in the model, hidden on screen;
+> `--block` to change), confidence ≥ 0.3. No more prompt-free mode, so no wall
+> labels. **Offline-tested only** (on saved snapshots) — details in
+> `CHANGELOG.md`. The previous `xlerobot_camera_1007.py` (prompt-free + big
+> blacklist/whitelist) is on hold.
 >
 > **Teleop + cameras in one script:** `xlerobot_Final_1007.py` (2026-10-07) =
 > teleop 1006 + camera 1006. Run it from `.venv` as usual
@@ -36,6 +38,15 @@ SO101, hardware-tuned 2026-09-04) via `xlerobot_JoyCon_0929.py` (dual arm
 > Camera options are renamed `--cam-head/--cam-left/--cam-right/--cam-list`;
 > `--no-camera` gives plain teleop. **Partly verified on hardware** (runs
 > together fine, 2026-10-07) — details in `CHANGELOG.md` (Final 1007).
+> `xlerobot_Final_1007b.py` adds a 1.5× faster gripper. Latest:
+> **`xlerobot_Final_1007c.py`** — 1007b with camera 1007b's detection
+> (YOLOE-26s text prompts, 15 words, `desk`/`chair` hidden; `--prompt` /
+> `--block` to change). Offline-tested only.
+> Control experiment: **`xlerobot_Final_1007_newcontrol.py`** — 1007c with
+> position (IK) arm control like XLeRobot's official Joy-Con example: stick
+> up/down moves the gripper forward/back, X/B (L: up/down) moves it up/down,
+> the wrist follows so the gripper keeps its angle, home (L: capture) returns
+> the arm to its start pose. Offline-tested only.
 
 **Not included in this repo — install them yourself (steps below):**
 Python 3.12 (conda or a venv), [lerobot](https://github.com/huggingface/lerobot)
