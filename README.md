@@ -25,7 +25,7 @@ SO101, hardware-tuned 2026-09-04) via `xlerobot_JoyCon_0929.py` (dual arm
 > false labels on walls: a larger blacklist (`BLOCK_WORDS`, `--block`), an
 > optional whitelist (`ALLOW_WORDS`, `--allow "chair,cup"`), both applied
 > before NMS, boxes covering ≥ 60 % of the frame dropped, `--find` to search
-> the model's word list, and default indices head 0 / left 2 / right 4.
+> the model's word list, and default indices head 0 / left 4 / right 2.
 > **Offline-tested only** (on saved snapshots) — details in `CHANGELOG.md`.
 >
 > **Teleop + cameras in one script:** `xlerobot_Final_1007.py` (2026-10-07) =

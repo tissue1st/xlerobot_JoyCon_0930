@@ -25,7 +25,7 @@ python xlerobot_JoyCon_<버전>.py --port1 COM5 --port2 COM6                   #
 
 | 버전 | 날짜 | 파일 | 한 줄 요약 | 상태 |
 |---|---|---|---|---|
-| camera 1007 | 2026-10-07 | `xlerobot_camera_1007.py` | 벽 오인식 줄이기: 블랙리스트 `BLOCK_WORDS` 확장, 화이트리스트 `ALLOW_WORDS`/`--allow`, 인식 전에 거름(`classes=`), 화면 60% 이상 박스 버림. 기본 카메라 번호 0/2/4 | 오프라인 테스트만 |
+| camera 1007 | 2026-10-07 | `xlerobot_camera_1007.py` | 벽 오인식 줄이기: 블랙리스트 `BLOCK_WORDS` 확장, 화이트리스트 `ALLOW_WORDS`/`--allow`, 인식 전에 거름(`classes=`), 화면 60% 이상 박스 버림. 기본 카메라 번호 헤드 0, 왼 4, 오른 2 | 오프라인 테스트만 |
 | Final 1007 | 2026-10-07 | `xlerobot_Final_1007.py` | 텔레옵 1006 + 카메라 1006을 한 파일로 합침. 명령 하나로 동시에 실행(카메라는 `.venv-vision` 별도 프로세스). 스냅샷은 화면 한 장만 | 일부 실기 확인 |
 | camera 1006 | 2026-10-06 (화면 정리 10-07) | `xlerobot_camera_1006.py` | 카메라 3대 라이브 뷰 + YOLOE 물체 인식 (텔레옵과 별도, `.venv-vision`) | 일부 실기 확인 |
 | 1006 | 2026-10-06 | `xlerobot_JoyCon_1006.py` | +/− 손목 원점 복귀 수정(버튼 직접 읽기), 카메라 속도 ×3.15 (0.4 → 1.26), 바퀴 최고속 ×0.8 | 오프라인 테스트만 |
@@ -57,7 +57,7 @@ python xlerobot_JoyCon_<버전>.py --port1 COM5 --port2 COM6                   #
 | 이름을 인식 **후**에 버려서, 막은 이름이 겹친 진짜 물체 박스를 NMS에서 먼저 지울 수 있었다 | 목록을 class 번호로 바꿔 `predict(classes=...)`에 넘긴다. NMS 전에 걸러진다. 이 모델은 end2end가 아니라서 NMS 경로를 탄다(확인함) |
 | 보고 싶은 것만 보는 방법이 `--prompt`뿐이었다(다른 가중치, 텍스트 임베딩) | 화이트리스트 `ALLOW_WORDS` / `--allow "chair,cup"`: 프롬프트 없는 모델 그대로, 그 이름만 보여준다 |
 | 단어를 넣어도 목록에 있는 이름인지 알 수 없었다 | `--find "wall"`로 단어 목록(4585개) 검색. 목록에 없는 단어는 시작할 때 경고한다 |
-| 기본 카메라 번호가 10-06 기준(4/2/3)이라 10-07에는 `--head 0 --left 2 --right 4`를 붙여야 했다 | 기본값을 0/2/4로 바꿨다(Final 1007과 같음) |
+| 기본 카메라 번호가 10-06 기준(4/2/3)이라 10-07에는 `--head 0 --left 2 --right 4`를 붙여야 했다 | 기본값을 헤드 0, 왼 4, 오른 2로 바꿨다(Final 1007과 같음). 처음엔 왼 2 / 오른 4로 넣었다가 실기에서 좌우가 바뀌어 보여 고쳤다(2026-10-07, 사용자 확인) |
 
 ### 바뀐 것
 - 이름은 **정확히 같아야** 걸린다. `"wall"`은 `"wall clock"`, `"wall lamp"`를 막지 않는다.
@@ -80,14 +80,14 @@ python xlerobot_JoyCon_<버전>.py --port1 COM5 --port2 COM6                   #
 ### 설정값
 - 새로 생긴 것: `ALLOW_WORDS` (빈 집합 = 끔), `MAX_BOX_FRAC` 0.6
 - 이름이 바뀐 것: `IGNORE_WORDS` → `BLOCK_WORDS` (16 → 82단어)
-- 값이 바뀐 것: `CAMERA_DEFAULTS` 헤드 4 → 0, 오른손목 3 → 4 (왼손목 2 그대로)
+- 값이 바뀐 것: `CAMERA_DEFAULTS` 헤드 4 → 0, 왼손목 2 → 4, 오른손목 3 → 2 (2026-10-07 사용자 확인으로 좌우 고침)
 
 ### 실기 확인
 - [ ] 벽, 천장, 창에 엉뚱한 이름이 줄었는지 (헤드 카메라로 벽을 비춰 보기)
 - [ ] 진짜 물체(의자, 선풍기, 컵 등)가 1006만큼 잡히는지
 - [ ] `--allow`로 준 이름만 나오는지
 - [ ] 손목 카메라 바로 앞 물체가 큰 박스 거르기에 지워지지 않는지 (지워지면 `--allow`에 넣거나 `--max-box-frac`를 올림)
-- [ ] 기본 번호 0/2/4로 화면이 맞게 뜨는지
+- [x] 기본 번호로 화면이 맞게 뜨는지: 처음 넣은 왼 2 / 오른 4는 좌우가 바뀌어 있었다(2026-10-07, 사용자). 왼 4 / 오른 2로 고침, 고친 뒤는 미확인
 
 ### 알려진 문제 / 남은 일
 - 그리퍼가 `typewriter`, `paper cutter`, `harpsichord`, `flip`으로 잡힌다. 벽 문제는 아니라서 이번에는 막지 않았다. 거슬리면 `--block`으로 더하거나 화이트리스트를 쓴다.
@@ -111,7 +111,7 @@ python xlerobot_JoyCon_<버전>.py --port1 COM5 --port2 COM6                   #
 |---|---|
 | 텔레옵과 카메라를 터미널 두 개에서 각각 다른 venv로 실행해야 했다 | `.venv`에서 명령 하나로 둘 다 뜬다 |
 | 스냅샷(`s`)이 카메라별 원본 3장 + 화면 1장, 모두 4장을 저장했다 | 화면에 보이는 그대로 **한 장만** 저장한다 (`captures/{시각}_view.jpg`, 사용자 요청) |
-| 카메라 기본 번호가 10-06 기준(헤드 4, 왼 2, 오른 3)이라 10-07에는 헤드 자리에 손목 카메라가 떴다 | 기본값을 10-07 번호(헤드 0, 왼 2, 오른 4)로 바꿨다 |
+| 카메라 기본 번호가 10-06 기준(헤드 4, 왼 2, 오른 3)이라 10-07에는 헤드 자리에 손목 카메라가 떴다 | 기본값을 10-07 번호(헤드 0, 왼 4, 오른 2)로 바꿨다. 처음엔 왼 2 / 오른 4로 넣었다가 실기에서 좌우가 바뀌어 보여 같은 날 고쳤다(사용자 확인) |
 
 ### 바뀐 것
 
@@ -141,7 +141,7 @@ python xlerobot_JoyCon_<버전>.py --port1 COM5 --port2 COM6                   #
 .venv\Scripts\activate
 python xlerobot_Final_1007.py --port1 COM5 --port2 COM6                    # 텔레옵 + 카메라
 python xlerobot_Final_1007.py --port1 COM5 --port2 COM6 --no-camera        # 텔레옵만 (= 1006)
-python xlerobot_Final_1007.py --port1 COM5 --port2 COM6 --cam-head 0 --cam-left 2 --cam-right 4
+python xlerobot_Final_1007.py --port1 COM5 --port2 COM6 --cam-head 0 --cam-left 4 --cam-right 2
 python xlerobot_Final_1007.py --port1 COM5 --port2 COM6 --prompt "cup,bottle,phone"
 
 .venv-vision\Scripts\python xlerobot_Final_1007.py --cam-list              # 카메라 번호 확인
@@ -151,7 +151,7 @@ python xlerobot_Final_1007.py --port1 COM5 --port2 COM6 --prompt "cup,bottle,pho
 - `--cams`, `--no-detect`, `--prompt`, `--conf`, `--device`는 그대로다. `--vision-python`으로 카메라용 파이썬 경로를 바꿀 수 있다.
 
 ### 설정값
-- 값이 바뀐 것: `CAMERA_DEFAULTS` 헤드 4 → 0, 오른손목 3 → 4 (왼손목 2 그대로)
+- 값이 바뀐 것: `CAMERA_DEFAULTS` 헤드 4 → 0, 왼손목 2 → 4, 오른손목 3 → 2
 - 이름이 바뀐 것: 카메라의 `BACKEND` → `CAMERA_BACKEND`
 - 텔레옵 설정값: 1006과 같음
 
@@ -178,7 +178,7 @@ python xlerobot_Final_1007.py --port1 COM5 --port2 COM6 --prompt "cup,bottle,pho
 - **상태**: 일부 실기 확인.
   - 2026-10-06: 첫 버전을 사용자가 실기로 실행했다. 카메라 3대가 잘 보였고, 초점은 렌즈를 돌려 직접 맞췄다. 인식이 오락가락하고 너무 많이 잡아서 정신없다는 피드백이 있었다.
   - 2026-10-07: 그 피드백으로 화면 정리를 넣었다. 사용자 요청으로 새 파일을 만들지 않고 1006 파일을 직접 고쳤다.
-  - 2026-10-07 오후 실기: 화면 정리 후 물체 수가 줄었다(사용자 확인). 스냅샷도 찍었다. 카메라 번호가 바뀌어 있어서(헤드 0, 왼 2, 오른 4) `--head 0 --left 2 --right 4`로 실행했다.
+  - 2026-10-07 오후 실기: 화면 정리 후 물체 수가 줄었다(사용자 확인). 스냅샷도 찍었다. 카메라 번호가 바뀌어 있어서(헤드 0, 왼 2, 오른 4) `--head 0 --left 2 --right 4`로 실행했다. 이 실행에서 왼쪽 / 오른쪽 칸이 실제와 반대였다(사용자 확인): 실제 번호는 왼손목 4, 오른손목 2다.
 - **요약**: 헤드 + 양 손목 카메라를 한 창에 띄우고, YOLOE로 물체를 인식해 박스(와 윤곽선)를 그린다. 텔레옵과 따로 도는 테스트용이다. 검증이 끝나면 텔레옵과 합친다.
 
 ### 만든 이유

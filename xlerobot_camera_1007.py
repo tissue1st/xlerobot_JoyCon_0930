@@ -23,7 +23,7 @@ RTX 50 시리즈는 CUDA 12.8 이상 빌드가 필요하다.
     .venv-vision\\Scripts\\python xlerobot_camera_1007.py --find "wall"                 # 내장 단어 목록에서 검색만
     .venv-vision\\Scripts\\python xlerobot_camera_1007.py --no-detect     # 카메라만 (인식 끔)
     .venv-vision\\Scripts\\python xlerobot_camera_1007.py --cams head     # 헤드만
-    .venv-vision\\Scripts\\python xlerobot_camera_1007.py --head 0 --left 2 --right 4   # 번호 지정
+    .venv-vision\\Scripts\\python xlerobot_camera_1007.py --head 0 --left 4 --right 2   # 번호 지정
 
 키 (영상 창이 선택된 상태에서):
     q / Esc  종료
@@ -32,7 +32,7 @@ RTX 50 시리즈는 CUDA 12.8 이상 빌드가 필요하다.
     s        스냅샷 저장 (captures/ 폴더: 카메라별 원본 + 표시 화면)
 
 카메라 번호 (같은 모델 USB2.0_CAM1 세 대, 640x480 YUY2 약 30fps):
-    2026-10-07 실측 (기본값): 헤드 = 0, 왼팔 손목 = 2, 오른팔 손목 = 4.
+    2026-10-07 실측 (기본값): 헤드 = 0, 왼팔 손목 = 4, 오른팔 손목 = 2 (처음 2/4로 적었다가 사용자 확인으로 좌우 바꿈).
     2026-10-06 실측: 헤드 = 4, 왼팔 손목 = 2, 오른팔 손목 = 3, 0 = 노트북 내장, 1 = 가상 카메라.
 Windows는 꽂는 순서나 재부팅에 따라 번호를 다시 매긴다. 세 대가 같은 모델이라
 이름으로는 구분이 안 된다. 화면이 엉뚱하면 --list로 번호를 보고 (렌즈 하나를
@@ -80,7 +80,7 @@ from datetime import datetime
 import cv2
 import numpy as np
 
-CAMERA_DEFAULTS = {"head": 0, "left": 2, "right": 4}  # 2026-10-07 번호 (위 참고)
+CAMERA_DEFAULTS = {"head": 0, "left": 4, "right": 2}  # 2026-10-07 번호 (처음 왼 2 / 오른 4로 적었다가 사용자 확인으로 좌우 바꿈)
 CAMERA_ORDER = ("left", "head", "right")  # 화면 배치: 왼손목 | 헤드 | 오른손목
 CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 480

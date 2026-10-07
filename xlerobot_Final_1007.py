@@ -262,7 +262,7 @@ import하므로 pyzmq가 설치돼 있어야 한다:
     python xlerobot_Final_1007.py --robot-id <id> --calibrate   # 아직 캘리브레이션 파일이 없을 때
   (Windows는 --port1 COMx --port2 COMy 필수)
   카메라 옵션 (텔레옵과 함께 줄 수 있음):
-    --cam-head 0 --cam-left 2 --cam-right 4   # 카메라 번호 (기본값은 CAMERA_DEFAULTS)
+    --cam-head 0 --cam-left 4 --cam-right 2   # 카메라 번호 (기본값은 CAMERA_DEFAULTS)
     --cams head                               # 쓸 카메라만
     --prompt "cup,bottle,phone"               # 이 단어들만 찾기
     --no-detect                               # 인식 없이 화면만
@@ -1558,7 +1558,8 @@ def check_joycons():
 # 카메라 번호: 세 대가 같은 모델 (USB2.0_CAM1, 640x480 YUY2 약 30fps)이라 이름으로는
 # 구분이 안 되고, Windows는 꽂는 순서나 재부팅에 따라 번호를 다시 매긴다.
 #   2026-10-06: 헤드 4, 왼손목 2, 오른손목 3 (0 = 노트북 내장, 1 = 가상 카메라)
-#   2026-10-07: 헤드 0, 왼손목 2, 오른손목 4 (1 = 노트북 내장, 3 = 가상 카메라)
+#   2026-10-07: 헤드 0, 왼손목 4, 오른손목 2 (1 = 노트북 내장, 3 = 가상 카메라). 처음엔 왼 2 / 오른 4로
+#               적었다가 좌우가 바뀌어 보인다는 사용자 확인으로 고침.
 # 화면이 엉뚱하면 --cam-list로 번호를 보고 (렌즈 하나를 손으로 가리면 그 번호의
 # 밝기가 뚝 떨어진다) --cam-head/--cam-left/--cam-right로 지정한다.
 #
@@ -1577,7 +1578,7 @@ def check_joycons():
 #     붙은 것으로 고정해서 chair <-> office chair 처럼 바뀌는 걸 막는다.
 #   - 카메라당 MAX_OBJECTS_PER_CAMERA 개까지만 표시.
 # ---------------------------------------------------------------------------
-CAMERA_DEFAULTS = {"head": 0, "left": 2, "right": 4}  # 2026-10-07 번호 (위 참고)
+CAMERA_DEFAULTS = {"head": 0, "left": 4, "right": 2}  # 2026-10-07 번호 (위 참고)
 CAMERA_ORDER = ("left", "head", "right")  # 화면 배치: 왼손목 | 헤드 | 오른손목
 CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 480
