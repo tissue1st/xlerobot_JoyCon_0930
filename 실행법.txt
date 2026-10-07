@@ -3,5 +3,12 @@ python xlerobot_JoyCon_1006.py --check-joycons
 python xlerobot_JoyCon_1006.py --port1 COM5 --port2 COM6
 
 # camera (separate venv, no activate needed)
-.venv-vision\Scripts\python xlerobot_camera_1006.py --list
-.venv-vision\Scripts\python xlerobot_camera_1006.py
+.venv-vision\Scripts\python xlerobot_camera_1007.py --list
+.venv-vision\Scripts\python xlerobot_camera_1007.py
+.venv-vision\Scripts\python xlerobot_camera_1007.py --allow "chair,cup,bottle"   # whitelist
+.venv-vision\Scripts\python xlerobot_camera_1007.py --block "typewriter"         # add to blacklist
+.venv-vision\Scripts\python xlerobot_camera_1007.py --find "wall"               # search word list
+
+# Final 1007: teleop + camera together (camera window runs from .venv-vision automatically)
+python xlerobot_Final_1007.py --port1 COM5 --port2 COM6
+.venv-vision\Scripts\python xlerobot_Final_1007.py --cam-list

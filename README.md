@@ -21,7 +21,21 @@ SO101, hardware-tuned 2026-09-04) via `xlerobot_JoyCon_0929.py` (dual arm
 > both wrist cameras in one window and labels objects with YOLOE. It runs on
 > its own venv and does not touch the robot — see
 > [Camera + object detection](#camera--object-detection-xlerobot_camera_1006py) below.
-> It will be merged into the teleop script once verified.
+> Latest camera version: **`xlerobot_camera_1007.py`** (2026-10-07) — fewer
+> false labels on walls: a larger blacklist (`BLOCK_WORDS`, `--block`), an
+> optional whitelist (`ALLOW_WORDS`, `--allow "chair,cup"`), both applied
+> before NMS, boxes covering ≥ 60 % of the frame dropped, `--find` to search
+> the model's word list, and default indices head 0 / left 2 / right 4.
+> **Offline-tested only** (on saved snapshots) — details in `CHANGELOG.md`.
+>
+> **Teleop + cameras in one script:** `xlerobot_Final_1007.py` (2026-10-07) =
+> teleop 1006 + camera 1006. Run it from `.venv` as usual
+> (`python xlerobot_Final_1007.py --port1 COM5 --port2 COM6`); it starts the
+> camera window as a second process with `.venv-vision`'s Python. `q` in the
+> camera window closes only the cameras; Ctrl+C in the terminal stops both.
+> Camera options are renamed `--cam-head/--cam-left/--cam-right/--cam-list`;
+> `--no-camera` gives plain teleop. **Partly verified on hardware** (runs
+> together fine, 2026-10-07) — details in `CHANGELOG.md` (Final 1007).
 
 **Not included in this repo — install them yourself (steps below):**
 Python 3.12 (conda or a venv), [lerobot](https://github.com/huggingface/lerobot)
