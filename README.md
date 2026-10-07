@@ -223,6 +223,15 @@ python xlerobot_JoyCon_0930.py --robot-id <id> --calibrate       # no calibratio
 # Windows example (dev PC): python xlerobot_JoyCon_0930.py --port1 COM5 --port2 COM6 --wheel-dry-run
 ```
 
+**Calibration backup:** this robot's calibration (2026-09-30) is kept in
+[`calibration/xlerobot_2wheels/my_xlerobot_2wheels.json`](calibration/xlerobot_2wheels/my_xlerobot_2wheels.json).
+On a new PC (or after the cache was wiped), copy it to
+`%USERPROFILE%\.cache\huggingface\lerobot\calibration\robots\xlerobot_2wheels\`
+(Ubuntu: `~/.cache/huggingface/lerobot/calibration/robots/xlerobot_2wheels/`)
+and press ENTER at the restore prompt -- no manual calibration needed. It is
+specific to this robot: after replacing a motor or re-assembling an arm,
+recalibrate and commit the new file here.
+
 Calibration: `--robot-id` names the file
 `~/.cache/huggingface/lerobot/calibration/robots/xlerobot_2wheels/<id>.json`
 (default id `my_xlerobot_2wheels`; XLeRobot's own direct-control
