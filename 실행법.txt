@@ -1,3 +1,7 @@
 .venv\Scripts\activate
-python xlerobot_JoyCon_0930.py --check-joycons
-python xlerobot_JoyCon_0930.py --port1 COM5 --port2 COM6 --wheel-dry-run
+python xlerobot_JoyCon_1006.py --check-joycons
+python xlerobot_JoyCon_1006.py --port1 COM5 --port2 COM6
+
+# camera (separate venv, no activate needed)
+.venv-vision\Scripts\python xlerobot_camera_1006.py --list
+.venv-vision\Scripts\python xlerobot_camera_1006.py

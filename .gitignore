@@ -3,5 +3,9 @@
 /joycon-robotics/
 /XLeRobot/
 /.venv/
+/.venv-vision/
 __pycache__/
 *.pyc
+# 카메라 스크립트: 처음 실행할 때 내려받는 YOLOE 가중치, 스냅샷 (s 키)
+*.pt
+/captures/

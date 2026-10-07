@@ -11,10 +11,17 @@ SO101, hardware-tuned 2026-09-04) via `xlerobot_JoyCon_0929.py` (dual arm
 > (`xlerobot_JoyCon_0930.py`, `xlerobot_JoyCon_1001.py`, …) with the same
 > setup and command-line options; older files are never edited. Each
 > version's changes, reasons and hardware-check status are logged in
-> [`CHANGELOG.md`](CHANGELOG.md) (Korean). Latest: **1001** (2026-10-01) —
-> stick = pan/lift, ZR/ZL = gripper, R + right stick = camera, **L3 alone
-> toggles ARM ↔ WHEEL**; **offline-tested only** so far.
+> [`CHANGELOG.md`](CHANGELOG.md) (Korean). Latest: **1006** (2026-10-06) —
+> 1001's layout (stick = pan/lift, ZR/ZL = gripper, R + right stick = camera,
+> **L3 alone toggles ARM ↔ WHEEL**) with a working plus/minus wrist reset,
+> a faster camera and 80 % wheel speed; **offline-tested only** so far.
 > The rest of this README describes the 0930 script.
+>
+> **Camera script:** `xlerobot_camera_1006.py` (2026-10-06) shows the head and
+> both wrist cameras in one window and labels objects with YOLOE. It runs on
+> its own venv and does not touch the robot — see
+> [Camera + object detection](#camera--object-detection-xlerobot_camera_1006py) below.
+> It will be merged into the teleop script once verified.
 
 **Not included in this repo — install them yourself (steps below):**
 Python 3.12 (conda or a venv), [lerobot](https://github.com/huggingface/lerobot)
@@ -42,6 +49,37 @@ Two modes:
 | 1 | Two Joy-Cons → two arms on XLeRobot's `xlerobot_2wheels` class | **works on hardware** (Windows, 2026-09-30: calibration, zeroing, ARM-mode control of both arms) |
 | 2 | ARM / WHEEL modes (L3 / R3), left-tilt driving, latched ZL brake, head camera on right X/B/Y/A, watchdog, LEDs, `--wheel-dry-run` | **partly verified on hardware**: L3 → WHEEL and forward/back driving work. Turning was dead in the real grip → turn axis re-mapped from a measured log (untested since). Open: R3 → ARM didn't switch back in the first run, although a Joy-Con-only log shows every R3 press arriving |
 | — | Wrist/center camera image streams | out of scope; this script doesn't touch cameras |
+
+### Camera + object detection (`xlerobot_camera_1006.py`)
+
+Separate from the teleop: opens the cameras only (no motor bus, no Joy-Cons).
+Uses its own venv `.venv-vision` because it needs the CUDA build of torch,
+while the teleop `.venv` has the CPU build that lerobot pins. Versions are kept
+inside lerobot's limits (torch 2.11, numpy < 2.3, OpenCV < 4.14) so the two can
+be merged into one venv later. RTX 50-series GPUs need a CUDA 12.8+ build.
+
+```powershell
+uv venv .venv-vision --python 3.12
+uv pip install --python .venv-vision/Scripts/python.exe torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu128
+uv pip install --python .venv-vision/Scripts/python.exe ultralytics "numpy==2.2.6" "opencv-python==4.13.0.92"
+
+.venv-vision\Scripts\python xlerobot_camera_1006.py --list    # which index is which camera
+.venv-vision\Scripts\python xlerobot_camera_1006.py           # 3 cameras + prompt-free detection
+.venv-vision\Scripts\python xlerobot_camera_1006.py --prompt "cup,bottle"   # only these objects
+.venv-vision\Scripts\python xlerobot_camera_1006.py --no-detect             # cameras only
+```
+
+- Default indices (dev PC, 2026-10-06): head = 4, left wrist = 2, right wrist = 3
+  (three identical `USB2.0_CAM1`, 640x480). Windows renumbers cameras when they
+  are re-plugged; run `--list`, cover one lens and see which brightness drops,
+  then pass `--head/--left/--right`.
+- Model: YOLOE-26s-seg (ultralytics), boxes + outlines. The weights download on
+  the first run. About 35–40 ms for all three cameras on an RTX 5050 Laptop.
+- Keys in the video window: `q` quit, `d` detection on/off, `m` outlines on/off,
+  `s` snapshot to `captures/`.
+- Display is de-cluttered: objects must be seen for a few frames before they
+  appear and are held briefly when missed; confidence ≥ 0.4, at most 10 per
+  camera, non-object words (`IGNORE_WORDS`) dropped. Details in `CHANGELOG.md`.
 
 ### Setup — Ubuntu
 
