@@ -29,6 +29,13 @@ SO101, hardware-tuned 2026-09-04) via `xlerobot_JoyCon_0929.py` (dual arm
 > labels. **Offline-tested only** (on saved snapshots) — details in
 > `CHANGELOG.md`. The previous `xlerobot_camera_1007.py` (prompt-free + big
 > blacklist/whitelist) is on hold.
+> Latest: **`xlerobot_camera_1008.py`** (2026-10-08) — objects are drawn as
+> outlines that follow their shape (from the segmentation masks) instead of
+> boxes (`m` switches back to boxes), `chair` is no longer blacklisted (it is a
+> prompt word now, 16 words; only `desk` is hidden), up to 15 objects per
+> camera are shown, and detection is capped at 15 Hz (`--detect-hz`, 0 = no
+> cap; the view still refreshes with every camera frame). Offline-tested on
+> saved snapshots only.
 >
 > **Teleop + cameras in one script:** `xlerobot_Final_1007.py` (2026-10-07) =
 > teleop 1006 + camera 1006. Run it from `.venv` as usual
@@ -47,6 +54,16 @@ SO101, hardware-tuned 2026-09-04) via `xlerobot_JoyCon_0929.py` (dual arm
 > up/down moves the gripper forward/back, X/B (L: up/down) moves it up/down,
 > the wrist follows so the gripper keeps its angle, home (L: capture) returns
 > the arm to its start pose. Offline-tested only.
+>
+> **Motion model (no robot needed):** `xlerobot_JoyCon_1008.py` (2026-10-08) is
+> not a runnable teleop but a pure-logic module for the next control scheme, to
+> be imported by a later `xlerobot_Final_*`: turning the Joy-Con left/right
+> (the heading of its long axis) drives shoulder_pan 1:1, the stick's vertical
+> axis moves the gripper forward/back and its horizontal axis up/down (IK), so
+> arm motors 1-3 need no buttons. The gyro bias is measured once at startup
+> (Joy-Con on the desk); pan only starts following after the first stick push,
+> so picking the Joy-Con up does not swing the arm. **Not tested yet** (code,
+> synthetic IMU checks and review only) — details in `CHANGELOG.md` (1008).
 
 **Not included in this repo — install them yourself (steps below):**
 Python 3.12 (conda or a venv), [lerobot](https://github.com/huggingface/lerobot)

@@ -3,10 +3,11 @@ python xlerobot_JoyCon_1006.py --check-joycons
 python xlerobot_JoyCon_1006.py --port1 COM5 --port2 COM6
 
 # camera (separate venv, no activate needed)
-.venv-vision\Scripts\python xlerobot_camera_1007b.py --list
-.venv-vision\Scripts\python xlerobot_camera_1007b.py                             # YOLOE-26s, 15 words, desk/chair hidden
-.venv-vision\Scripts\python xlerobot_camera_1007b.py --prompt "cup,bottle,box"   # change words
-.venv-vision\Scripts\python xlerobot_camera_1007b.py --block ""                  # blacklist off
+.venv-vision\Scripts\python xlerobot_camera_1008.py --list
+.venv-vision\Scripts\python xlerobot_camera_1008.py                              # YOLOE-26s, 16 words (chair shown), desk hidden, outlines (m = boxes), max 15/camera, detection 15 Hz
+.venv-vision\Scripts\python xlerobot_camera_1008.py --detect-hz 10               # change detection rate (0 = no limit)
+.venv-vision\Scripts\python xlerobot_camera_1008.py --prompt "cup,bottle,box"    # change words
+.venv-vision\Scripts\python xlerobot_camera_1008.py --block ""                   # blacklist off
 
 # model compare (YOLOE / RF-DETR / YOLO-World / SAM 3 side by side; Space = same frame, c = camera)
 .venv-vision\Scripts\python xlerobot_model_compare_1007.py
